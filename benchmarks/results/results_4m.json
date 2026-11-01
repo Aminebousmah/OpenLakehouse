@@ -1,0 +1,880 @@
+{
+  "scale": "4m",
+  "runs_per_query": 7,
+  "machine": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "cpus": 16,
+    "docker_memory_note": "Docker Desktop WSL2 : 16 CPU, 15 Go, Trino en un seul noeud avec 8 Go de tas. VeliStream tournait en parallele."
+  },
+  "tables": {
+    "non_partitioned": {
+      "rows": 93155058,
+      "files": 16,
+      "size_bytes": 4989200178
+    },
+    "partitioned_days": {
+      "rows": 93155058,
+      "files": 138,
+      "size_bytes": 4605040356
+    },
+    "partitioned_months": {
+      "rows": 93155058,
+      "files": 16,
+      "size_bytes": 4988546408
+    },
+    "fragmented": {
+      "rows": 22377762,
+      "files": 1160,
+      "size_bytes": 1285516159
+    },
+    "compacted": {
+      "rows": 22377762,
+      "files": 29,
+      "size_bytes": 1125588232
+    }
+  },
+  "summary": [
+    {
+      "table": "compacted",
+      "query": "dimension_join",
+      "runs": 7,
+      "median_s": 0.364,
+      "p95_s": 0.376
+    },
+    {
+      "table": "compacted",
+      "query": "monthly_aggregate",
+      "runs": 7,
+      "median_s": 0.334,
+      "p95_s": 0.377
+    },
+    {
+      "table": "compacted",
+      "query": "single_day_filter",
+      "runs": 7,
+      "median_s": 0.082,
+      "p95_s": 0.087
+    },
+    {
+      "table": "compacted",
+      "query": "top_zones",
+      "runs": 7,
+      "median_s": 0.149,
+      "p95_s": 0.162
+    },
+    {
+      "table": "fragmented",
+      "query": "dimension_join",
+      "runs": 7,
+      "median_s": 0.849,
+      "p95_s": 0.92
+    },
+    {
+      "table": "fragmented",
+      "query": "monthly_aggregate",
+      "runs": 7,
+      "median_s": 0.838,
+      "p95_s": 0.909
+    },
+    {
+      "table": "fragmented",
+      "query": "single_day_filter",
+      "runs": 7,
+      "median_s": 0.095,
+      "p95_s": 0.108
+    },
+    {
+      "table": "fragmented",
+      "query": "top_zones",
+      "runs": 7,
+      "median_s": 0.578,
+      "p95_s": 0.628
+    },
+    {
+      "table": "non_partitioned",
+      "query": "dimension_join",
+      "runs": 7,
+      "median_s": 0.501,
+      "p95_s": 0.514
+    },
+    {
+      "table": "non_partitioned",
+      "query": "monthly_aggregate",
+      "runs": 7,
+      "median_s": 1.152,
+      "p95_s": 1.261
+    },
+    {
+      "table": "non_partitioned",
+      "query": "single_day_filter",
+      "runs": 7,
+      "median_s": 0.156,
+      "p95_s": 0.181
+    },
+    {
+      "table": "non_partitioned",
+      "query": "top_zones",
+      "runs": 7,
+      "median_s": 0.226,
+      "p95_s": 0.255
+    },
+    {
+      "table": "partitioned_days",
+      "query": "dimension_join",
+      "runs": 7,
+      "median_s": 0.384,
+      "p95_s": 0.426
+    },
+    {
+      "table": "partitioned_days",
+      "query": "monthly_aggregate",
+      "runs": 7,
+      "median_s": 1.151,
+      "p95_s": 1.271
+    },
+    {
+      "table": "partitioned_days",
+      "query": "single_day_filter",
+      "runs": 7,
+      "median_s": 0.083,
+      "p95_s": 0.087
+    },
+    {
+      "table": "partitioned_days",
+      "query": "top_zones",
+      "runs": 7,
+      "median_s": 0.15,
+      "p95_s": 0.166
+    },
+    {
+      "table": "partitioned_months",
+      "query": "dimension_join",
+      "runs": 7,
+      "median_s": 0.448,
+      "p95_s": 0.551
+    },
+    {
+      "table": "partitioned_months",
+      "query": "monthly_aggregate",
+      "runs": 7,
+      "median_s": 1.165,
+      "p95_s": 1.269
+    },
+    {
+      "table": "partitioned_months",
+      "query": "single_day_filter",
+      "runs": 7,
+      "median_s": 0.152,
+      "p95_s": 0.167
+    },
+    {
+      "table": "partitioned_months",
+      "query": "top_zones",
+      "runs": 7,
+      "median_s": 0.16,
+      "p95_s": 0.174
+    }
+  ],
+  "raw": [
+    {
+      "table": "non_partitioned",
+      "query": "monthly_aggregate",
+      "seconds": 1.2613512999960221
+    },
+    {
+      "table": "non_partitioned",
+      "query": "monthly_aggregate",
+      "seconds": 1.1471845000050962
+    },
+    {
+      "table": "non_partitioned",
+      "query": "monthly_aggregate",
+      "seconds": 1.2182032999990042
+    },
+    {
+      "table": "non_partitioned",
+      "query": "monthly_aggregate",
+      "seconds": 1.2502134999958798
+    },
+    {
+      "table": "non_partitioned",
+      "query": "monthly_aggregate",
+      "seconds": 1.1521184000012
+    },
+    {
+      "table": "non_partitioned",
+      "query": "monthly_aggregate",
+      "seconds": 1.1495326000149362
+    },
+    {
+      "table": "non_partitioned",
+      "query": "monthly_aggregate",
+      "seconds": 1.129569899989292
+    },
+    {
+      "table": "non_partitioned",
+      "query": "single_day_filter",
+      "seconds": 0.14669100000173785
+    },
+    {
+      "table": "non_partitioned",
+      "query": "single_day_filter",
+      "seconds": 0.17281530000036582
+    },
+    {
+      "table": "non_partitioned",
+      "query": "single_day_filter",
+      "seconds": 0.16508130001602694
+    },
+    {
+      "table": "non_partitioned",
+      "query": "single_day_filter",
+      "seconds": 0.15600959997391328
+    },
+    {
+      "table": "non_partitioned",
+      "query": "single_day_filter",
+      "seconds": 0.1499099000066053
+    },
+    {
+      "table": "non_partitioned",
+      "query": "single_day_filter",
+      "seconds": 0.13834059998043813
+    },
+    {
+      "table": "non_partitioned",
+      "query": "single_day_filter",
+      "seconds": 0.18118710000999272
+    },
+    {
+      "table": "non_partitioned",
+      "query": "top_zones",
+      "seconds": 0.24514840001938865
+    },
+    {
+      "table": "non_partitioned",
+      "query": "top_zones",
+      "seconds": 0.21466830000281334
+    },
+    {
+      "table": "non_partitioned",
+      "query": "top_zones",
+      "seconds": 0.22161469998536631
+    },
+    {
+      "table": "non_partitioned",
+      "query": "top_zones",
+      "seconds": 0.24069979999330826
+    },
+    {
+      "table": "non_partitioned",
+      "query": "top_zones",
+      "seconds": 0.21516089999931864
+    },
+    {
+      "table": "non_partitioned",
+      "query": "top_zones",
+      "seconds": 0.22582749999128282
+    },
+    {
+      "table": "non_partitioned",
+      "query": "top_zones",
+      "seconds": 0.2551497000094969
+    },
+    {
+      "table": "non_partitioned",
+      "query": "dimension_join",
+      "seconds": 0.49245769999106415
+    },
+    {
+      "table": "non_partitioned",
+      "query": "dimension_join",
+      "seconds": 0.5063455000054091
+    },
+    {
+      "table": "non_partitioned",
+      "query": "dimension_join",
+      "seconds": 0.5141323000134435
+    },
+    {
+      "table": "non_partitioned",
+      "query": "dimension_join",
+      "seconds": 0.5006932999822311
+    },
+    {
+      "table": "non_partitioned",
+      "query": "dimension_join",
+      "seconds": 0.5009025000035763
+    },
+    {
+      "table": "non_partitioned",
+      "query": "dimension_join",
+      "seconds": 0.490391900006216
+    },
+    {
+      "table": "non_partitioned",
+      "query": "dimension_join",
+      "seconds": 0.49167710001347587
+    },
+    {
+      "table": "partitioned_days",
+      "query": "monthly_aggregate",
+      "seconds": 1.188933299999917
+    },
+    {
+      "table": "partitioned_days",
+      "query": "monthly_aggregate",
+      "seconds": 1.1317121000029147
+    },
+    {
+      "table": "partitioned_days",
+      "query": "monthly_aggregate",
+      "seconds": 1.0683597000024747
+    },
+    {
+      "table": "partitioned_days",
+      "query": "monthly_aggregate",
+      "seconds": 1.23119280001265
+    },
+    {
+      "table": "partitioned_days",
+      "query": "monthly_aggregate",
+      "seconds": 1.0849190000153612
+    },
+    {
+      "table": "partitioned_days",
+      "query": "monthly_aggregate",
+      "seconds": 1.2708715999906417
+    },
+    {
+      "table": "partitioned_days",
+      "query": "monthly_aggregate",
+      "seconds": 1.1505053000000771
+    },
+    {
+      "table": "partitioned_days",
+      "query": "single_day_filter",
+      "seconds": 0.08705900001223199
+    },
+    {
+      "table": "partitioned_days",
+      "query": "single_day_filter",
+      "seconds": 0.08327110001118854
+    },
+    {
+      "table": "partitioned_days",
+      "query": "single_day_filter",
+      "seconds": 0.08183129999088123
+    },
+    {
+      "table": "partitioned_days",
+      "query": "single_day_filter",
+      "seconds": 0.08417670000926591
+    },
+    {
+      "table": "partitioned_days",
+      "query": "single_day_filter",
+      "seconds": 0.08255170000484213
+    },
+    {
+      "table": "partitioned_days",
+      "query": "single_day_filter",
+      "seconds": 0.08153039999888279
+    },
+    {
+      "table": "partitioned_days",
+      "query": "single_day_filter",
+      "seconds": 0.08483469998463988
+    },
+    {
+      "table": "partitioned_days",
+      "query": "top_zones",
+      "seconds": 0.14781090000178665
+    },
+    {
+      "table": "partitioned_days",
+      "query": "top_zones",
+      "seconds": 0.15007850000984035
+    },
+    {
+      "table": "partitioned_days",
+      "query": "top_zones",
+      "seconds": 0.14409340001293458
+    },
+    {
+      "table": "partitioned_days",
+      "query": "top_zones",
+      "seconds": 0.14659600000595674
+    },
+    {
+      "table": "partitioned_days",
+      "query": "top_zones",
+      "seconds": 0.1661149999999907
+    },
+    {
+      "table": "partitioned_days",
+      "query": "top_zones",
+      "seconds": 0.162053800013382
+    },
+    {
+      "table": "partitioned_days",
+      "query": "top_zones",
+      "seconds": 0.15320600001723506
+    },
+    {
+      "table": "partitioned_days",
+      "query": "dimension_join",
+      "seconds": 0.384007799992105
+    },
+    {
+      "table": "partitioned_days",
+      "query": "dimension_join",
+      "seconds": 0.3858186999859754
+    },
+    {
+      "table": "partitioned_days",
+      "query": "dimension_join",
+      "seconds": 0.3731098999851383
+    },
+    {
+      "table": "partitioned_days",
+      "query": "dimension_join",
+      "seconds": 0.38163319998420775
+    },
+    {
+      "table": "partitioned_days",
+      "query": "dimension_join",
+      "seconds": 0.4260939999949187
+    },
+    {
+      "table": "partitioned_days",
+      "query": "dimension_join",
+      "seconds": 0.388272300013341
+    },
+    {
+      "table": "partitioned_days",
+      "query": "dimension_join",
+      "seconds": 0.3491945000132546
+    },
+    {
+      "table": "partitioned_months",
+      "query": "monthly_aggregate",
+      "seconds": 1.1883711999980733
+    },
+    {
+      "table": "partitioned_months",
+      "query": "monthly_aggregate",
+      "seconds": 1.164586099999724
+    },
+    {
+      "table": "partitioned_months",
+      "query": "monthly_aggregate",
+      "seconds": 1.1476213999849278
+    },
+    {
+      "table": "partitioned_months",
+      "query": "monthly_aggregate",
+      "seconds": 1.2688434000010602
+    },
+    {
+      "table": "partitioned_months",
+      "query": "monthly_aggregate",
+      "seconds": 1.2572017000056803
+    },
+    {
+      "table": "partitioned_months",
+      "query": "monthly_aggregate",
+      "seconds": 1.145636499975808
+    },
+    {
+      "table": "partitioned_months",
+      "query": "monthly_aggregate",
+      "seconds": 1.1642133000132162
+    },
+    {
+      "table": "partitioned_months",
+      "query": "single_day_filter",
+      "seconds": 0.1475847999972757
+    },
+    {
+      "table": "partitioned_months",
+      "query": "single_day_filter",
+      "seconds": 0.14311450000968762
+    },
+    {
+      "table": "partitioned_months",
+      "query": "single_day_filter",
+      "seconds": 0.15628039999864995
+    },
+    {
+      "table": "partitioned_months",
+      "query": "single_day_filter",
+      "seconds": 0.16722200001822785
+    },
+    {
+      "table": "partitioned_months",
+      "query": "single_day_filter",
+      "seconds": 0.15221529998234473
+    },
+    {
+      "table": "partitioned_months",
+      "query": "single_day_filter",
+      "seconds": 0.1642275000049267
+    },
+    {
+      "table": "partitioned_months",
+      "query": "single_day_filter",
+      "seconds": 0.14193089999025688
+    },
+    {
+      "table": "partitioned_months",
+      "query": "top_zones",
+      "seconds": 0.168324099999154
+    },
+    {
+      "table": "partitioned_months",
+      "query": "top_zones",
+      "seconds": 0.15914829997927882
+    },
+    {
+      "table": "partitioned_months",
+      "query": "top_zones",
+      "seconds": 0.15981730000930838
+    },
+    {
+      "table": "partitioned_months",
+      "query": "top_zones",
+      "seconds": 0.16003460000501946
+    },
+    {
+      "table": "partitioned_months",
+      "query": "top_zones",
+      "seconds": 0.1614998999866657
+    },
+    {
+      "table": "partitioned_months",
+      "query": "top_zones",
+      "seconds": 0.17389649999677204
+    },
+    {
+      "table": "partitioned_months",
+      "query": "top_zones",
+      "seconds": 0.15581560001010075
+    },
+    {
+      "table": "partitioned_months",
+      "query": "dimension_join",
+      "seconds": 0.4308691999758594
+    },
+    {
+      "table": "partitioned_months",
+      "query": "dimension_join",
+      "seconds": 0.5511124000186101
+    },
+    {
+      "table": "partitioned_months",
+      "query": "dimension_join",
+      "seconds": 0.44846520002465695
+    },
+    {
+      "table": "partitioned_months",
+      "query": "dimension_join",
+      "seconds": 0.45984320002025925
+    },
+    {
+      "table": "partitioned_months",
+      "query": "dimension_join",
+      "seconds": 0.4347704000247177
+    },
+    {
+      "table": "partitioned_months",
+      "query": "dimension_join",
+      "seconds": 0.432785100012552
+    },
+    {
+      "table": "partitioned_months",
+      "query": "dimension_join",
+      "seconds": 0.48270059999777004
+    },
+    {
+      "table": "fragmented",
+      "query": "monthly_aggregate",
+      "seconds": 0.9047859999991488
+    },
+    {
+      "table": "fragmented",
+      "query": "monthly_aggregate",
+      "seconds": 0.9006692999973893
+    },
+    {
+      "table": "fragmented",
+      "query": "monthly_aggregate",
+      "seconds": 0.909277500002645
+    },
+    {
+      "table": "fragmented",
+      "query": "monthly_aggregate",
+      "seconds": 0.7950643000076525
+    },
+    {
+      "table": "fragmented",
+      "query": "monthly_aggregate",
+      "seconds": 0.8010098999948241
+    },
+    {
+      "table": "fragmented",
+      "query": "monthly_aggregate",
+      "seconds": 0.7449017000035383
+    },
+    {
+      "table": "fragmented",
+      "query": "monthly_aggregate",
+      "seconds": 0.838305000012042
+    },
+    {
+      "table": "fragmented",
+      "query": "single_day_filter",
+      "seconds": 0.09297749999677762
+    },
+    {
+      "table": "fragmented",
+      "query": "single_day_filter",
+      "seconds": 0.1084807000006549
+    },
+    {
+      "table": "fragmented",
+      "query": "single_day_filter",
+      "seconds": 0.09469060000265017
+    },
+    {
+      "table": "fragmented",
+      "query": "single_day_filter",
+      "seconds": 0.09539239999139681
+    },
+    {
+      "table": "fragmented",
+      "query": "single_day_filter",
+      "seconds": 0.09587150000152178
+    },
+    {
+      "table": "fragmented",
+      "query": "single_day_filter",
+      "seconds": 0.09450120001565665
+    },
+    {
+      "table": "fragmented",
+      "query": "single_day_filter",
+      "seconds": 0.09090509999077767
+    },
+    {
+      "table": "fragmented",
+      "query": "top_zones",
+      "seconds": 0.628037199989194
+    },
+    {
+      "table": "fragmented",
+      "query": "top_zones",
+      "seconds": 0.5395272999885492
+    },
+    {
+      "table": "fragmented",
+      "query": "top_zones",
+      "seconds": 0.5782465999945998
+    },
+    {
+      "table": "fragmented",
+      "query": "top_zones",
+      "seconds": 0.604679500014754
+    },
+    {
+      "table": "fragmented",
+      "query": "top_zones",
+      "seconds": 0.6032227000105195
+    },
+    {
+      "table": "fragmented",
+      "query": "top_zones",
+      "seconds": 0.5714704999991227
+    },
+    {
+      "table": "fragmented",
+      "query": "top_zones",
+      "seconds": 0.5663554000202566
+    },
+    {
+      "table": "fragmented",
+      "query": "dimension_join",
+      "seconds": 0.9154046000039671
+    },
+    {
+      "table": "fragmented",
+      "query": "dimension_join",
+      "seconds": 0.8818118000053801
+    },
+    {
+      "table": "fragmented",
+      "query": "dimension_join",
+      "seconds": 0.9196437999780755
+    },
+    {
+      "table": "fragmented",
+      "query": "dimension_join",
+      "seconds": 0.8097843000141438
+    },
+    {
+      "table": "fragmented",
+      "query": "dimension_join",
+      "seconds": 0.8364724999992177
+    },
+    {
+      "table": "fragmented",
+      "query": "dimension_join",
+      "seconds": 0.8475433999847155
+    },
+    {
+      "table": "fragmented",
+      "query": "dimension_join",
+      "seconds": 0.848710000020219
+    },
+    {
+      "table": "compacted",
+      "query": "monthly_aggregate",
+      "seconds": 0.3139989000046626
+    },
+    {
+      "table": "compacted",
+      "query": "monthly_aggregate",
+      "seconds": 0.3335236999846529
+    },
+    {
+      "table": "compacted",
+      "query": "monthly_aggregate",
+      "seconds": 0.33990069999708794
+    },
+    {
+      "table": "compacted",
+      "query": "monthly_aggregate",
+      "seconds": 0.37739790001069196
+    },
+    {
+      "table": "compacted",
+      "query": "monthly_aggregate",
+      "seconds": 0.33406720001949
+    },
+    {
+      "table": "compacted",
+      "query": "monthly_aggregate",
+      "seconds": 0.3173687000235077
+    },
+    {
+      "table": "compacted",
+      "query": "monthly_aggregate",
+      "seconds": 0.3245195000199601
+    },
+    {
+      "table": "compacted",
+      "query": "single_day_filter",
+      "seconds": 0.08181539998622611
+    },
+    {
+      "table": "compacted",
+      "query": "single_day_filter",
+      "seconds": 0.08012160001089796
+    },
+    {
+      "table": "compacted",
+      "query": "single_day_filter",
+      "seconds": 0.07848560001002625
+    },
+    {
+      "table": "compacted",
+      "query": "single_day_filter",
+      "seconds": 0.08340239999233745
+    },
+    {
+      "table": "compacted",
+      "query": "single_day_filter",
+      "seconds": 0.08716110000386834
+    },
+    {
+      "table": "compacted",
+      "query": "single_day_filter",
+      "seconds": 0.08047280000755563
+    },
+    {
+      "table": "compacted",
+      "query": "single_day_filter",
+      "seconds": 0.08324830001220107
+    },
+    {
+      "table": "compacted",
+      "query": "top_zones",
+      "seconds": 0.14867730002151802
+    },
+    {
+      "table": "compacted",
+      "query": "top_zones",
+      "seconds": 0.14574900001753122
+    },
+    {
+      "table": "compacted",
+      "query": "top_zones",
+      "seconds": 0.14681249999557622
+    },
+    {
+      "table": "compacted",
+      "query": "top_zones",
+      "seconds": 0.162117700005183
+    },
+    {
+      "table": "compacted",
+      "query": "top_zones",
+      "seconds": 0.15406070000608452
+    },
+    {
+      "table": "compacted",
+      "query": "top_zones",
+      "seconds": 0.14921779997530393
+    },
+    {
+      "table": "compacted",
+      "query": "top_zones",
+      "seconds": 0.15273200001684017
+    },
+    {
+      "table": "compacted",
+      "query": "dimension_join",
+      "seconds": 0.35979109999607317
+    },
+    {
+      "table": "compacted",
+      "query": "dimension_join",
+      "seconds": 0.3472701999999117
+    },
+    {
+      "table": "compacted",
+      "query": "dimension_join",
+      "seconds": 0.3349090999981854
+    },
+    {
+      "table": "compacted",
+      "query": "dimension_join",
+      "seconds": 0.3636627999949269
+    },
+    {
+      "table": "compacted",
+      "query": "dimension_join",
+      "seconds": 0.3708688000042457
+    },
+    {
+      "table": "compacted",
+      "query": "dimension_join",
+      "seconds": 0.3645803999970667
+    },
+    {
+      "table": "compacted",
+      "query": "dimension_join",
+      "seconds": 0.376039499999024
+    }
+  ]
+}
