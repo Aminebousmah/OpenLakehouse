@@ -1,0 +1,37 @@
+[project]
+name = "openlakehouse"
+version = "0.1.0"
+description = "Architecture lakehouse 100 % open source sur les trajets taxi et VTC de New York."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = { text = "MIT" }
+dependencies = [
+    "boto3>=1.34",
+    "httpx>=0.27",
+    "trino>=0.329",
+    "pyyaml>=6",
+    "pandas>=2.2",
+    "matplotlib>=3.8",
+    "dbt-trino>=1.8",
+]
+
+[dependency-groups]
+dev = ["pytest>=8", "ruff>=0.5"]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+# Runs on the Python of the Spark image, older than the project's.
+"spark_jobs/*" = ["UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
