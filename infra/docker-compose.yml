@@ -1,0 +1,114 @@
+name: openlakehouse
+
+x-lake-env: &lake-env
+  AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-lakeadmin}
+  AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:-lakeadmin123}
+  AWS_REGION: us-east-1
+
+services:
+  minio:
+    image: bitnamilegacy/minio:2025.7.23-debian-12-r5
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-lakeadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-lakeadmin123}
+      MINIO_DEFAULT_BUCKETS: bronze,warehouse
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/bitnami/minio/data
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      retries: 30
+
+  iceberg-rest:
+    image: apache/iceberg-rest-fixture:1.10.1
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      <<: *lake-env
+      CATALOG_WAREHOUSE: s3://warehouse/
+      CATALOG_IO__IMPL: org.apache.iceberg.aws.s3.S3FileIO
+      CATALOG_S3_ENDPOINT: http://minio:9000
+      CATALOG_S3_PATH__STYLE__ACCESS: "true"
+      CATALOG_URI: jdbc:sqlite:file:/catalog/iceberg.db
+      CATALOG_JDBC_USER: iceberg
+      CATALOG_JDBC_PASSWORD: iceberg
+    volumes:
+      - catalog-data:/catalog
+    user: root
+    ports:
+      - "8181:8181"
+
+  trino:
+    image: trinodb/trino:463
+    restart: unless-stopped
+    depends_on:
+      iceberg-rest:
+        condition: service_started
+    environment:
+      <<: *lake-env
+    volumes:
+      - ./trino/etc/jvm.config:/etc/trino/jvm.config:ro
+      - ./trino/etc/config.properties:/etc/trino/config.properties:ro
+      - ./trino/etc/access-control.properties:/etc/trino/access-control.properties:ro
+      - ./trino/etc/catalog/iceberg.properties:/etc/trino/catalog/iceberg.properties:ro
+      - ../governance/roles/trino_rules.json:/etc/trino/rules.json:ro
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "trino --execute 'select 1' || exit 1"]
+      interval: 10s
+      retries: 30
+
+  spark:
+    build: ./spark
+    depends_on:
+      iceberg-rest:
+        condition: service_started
+    environment:
+      <<: *lake-env
+    command: ["sleep", "infinity"]
+    volumes:
+      - ../spark_jobs:/opt/spark_jobs:ro
+    ports:
+      - "4040:4040"
+
+  airflow:
+    profiles: ["full"]
+    build: ./airflow
+    command: standalone
+    # The Docker socket lets the DAG reach the Spark container. Local use only.
+    group_add:
+      - "0"
+    environment:
+      <<: *lake-env
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+      S3_ENDPOINT: http://minio:9000
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-lakeadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-lakeadmin123}
+      TRINO_HOST: trino
+    volumes:
+      - ../airflow/dags:/opt/airflow/dags:ro
+      - ..:/opt/lakehouse:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8088:8080"
+
+  superset:
+    profiles: ["full"]
+    build: ./superset
+    environment:
+      SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY:-change-me-local-only}
+    ports:
+      - "8089:8088"
+    depends_on:
+      trino:
+        condition: service_healthy
+
+volumes:
+  minio-data:
+  catalog-data:
