@@ -1,0 +1,12 @@
+openlakehouse:
+  target: trino
+  outputs:
+    trino:
+      type: trino
+      method: none
+      user: engineer
+      host: "{{ env_var('TRINO_HOST', 'localhost') }}"
+      port: 8080
+      catalog: iceberg
+      schema: staging
+      threads: 2

@@ -1,0 +1,19 @@
+name: openlakehouse
+version: "1.0"
+profile: openlakehouse
+model-paths: ["models"]
+seed-paths: ["seeds"]
+target-path: target
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  openlakehouse:
+    staging:
+      +materialized: view
+    gold:
+      +materialized: table
+      +schema: gold
+
+seeds:
+  openlakehouse:
+    +schema: gold

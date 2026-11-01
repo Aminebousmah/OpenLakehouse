@@ -1,0 +1,48 @@
+version: 2
+
+models:
+  - name: fct_trip
+    description: Un trajet par ligne, tous services confondus.
+    columns:
+      - name: trip_id
+        tests: [not_null]
+      - name: service
+        tests:
+          - accepted_values:
+              arguments:
+                values: ["yellow", "green", "fhvhv"]
+      - name: pickup_zone_id
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_zone')
+                field: zone_id
+      - name: payment_type
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_payment')
+                field: payment_type
+  - name: dim_zone
+    columns:
+      - name: zone_id
+        tests: [not_null, unique]
+  - name: dim_date
+    columns:
+      - name: date_day
+        tests: [not_null, unique]
+  - name: dim_payment
+    columns:
+      - name: payment_type
+        tests: [not_null, unique]
+
+exposures:
+  - name: dashboard_superset
+    type: dashboard
+    label: Tableau de bord des trajets
+    owner:
+      name: Data engineering
+      email: data@example.test
+    depends_on:
+      - ref('fct_trip')
+      - ref('dim_zone')
