@@ -1,0 +1,24 @@
+contract: silver.trips
+version: 1.0.0
+owner: data-engineering
+sla:
+  freshness: "un mois chargé au plus tard 5 jours après sa publication par la TLC"
+  availability: "lecture via Trino, sans garantie d'astreinte (projet de démonstration)"
+partitioning: days(pickup_ts)
+primary_key: [trip_id]
+columns:
+  - { name: trip_id, type: varchar, nullable: false }
+  - { name: service, type: varchar, nullable: false, accepted_values: [yellow, green, fhvhv] }
+  - { name: vendor_id, type: varchar, nullable: true }
+  - { name: pickup_ts, type: timestamp, nullable: false }
+  - { name: dropoff_ts, type: timestamp, nullable: false }
+  - { name: pickup_zone_id, type: integer, nullable: false, min: 1, max: 265 }
+  - { name: dropoff_zone_id, type: integer, nullable: false, min: 1, max: 265 }
+  - { name: passenger_count, type: integer, nullable: true }
+  - { name: trip_distance_miles, type: double, nullable: false, min: 0, max: 200 }
+  - { name: payment_type, type: integer, nullable: true }
+  - { name: fare_amount, type: double, nullable: true }
+  - { name: tip_amount, type: double, nullable: true }
+  - { name: total_amount, type: double, nullable: false, min: 0 }
+  - { name: duration_minutes, type: double, nullable: false, min: 0, max: 360 }
+  - { name: source_month, type: varchar, nullable: false }

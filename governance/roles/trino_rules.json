@@ -1,0 +1,16 @@
+{
+  "catalogs": [
+    { "user": "engineer", "catalog": "iceberg", "allow": "all" },
+    { "user": "analyst", "catalog": "iceberg", "allow": "read-only" },
+    { "catalog": "system", "allow": "read-only" }
+  ],
+  "schemas": [
+    { "user": "engineer", "catalog": "iceberg", "owner": true },
+    { "user": "analyst", "catalog": "iceberg", "schema": "gold", "owner": false }
+  ],
+  "tables": [
+    { "catalog": "system", "privileges": ["SELECT"] },
+    { "user": "engineer", "catalog": "iceberg", "privileges": ["SELECT", "INSERT", "DELETE", "UPDATE", "OWNERSHIP"] },
+    { "user": "analyst", "catalog": "iceberg", "schema": "gold", "privileges": ["SELECT"] }
+  ]
+}
