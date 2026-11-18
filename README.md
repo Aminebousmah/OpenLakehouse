@@ -11,6 +11,7 @@ Le livrable principal est **l'architecture justifiée** autant que le code. Chaq
 ![Airflow](https://img.shields.io/badge/Airflow-2.10-017CEE?logo=apacheairflow&logoColor=white)
 ![Superset](https://img.shields.io/badge/Superset-4.1-20A6C9)
 ![License](https://img.shields.io/badge/license-MIT-green)
+[![CI](https://github.com/Aminebousmah/OpenLakehouse/actions/workflows/ci.yml/badge.svg)](https://github.com/Aminebousmah/OpenLakehouse/actions/workflows/ci.yml)
 
 ## L'architecture
 
@@ -19,10 +20,10 @@ flowchart LR
     A["NYC TLC<br/>Parquet mensuels"] --> B["Bronze<br/>fichiers bruts<br/>MinIO"]
     B -- "Spark" --> C["Silver<br/>nettoyé, typé, dédoublonné<br/>Iceberg, days(pickup_ts)"]
     C -- "contrat de données" --> Q{"Contrôle<br/>qualité"}
-    Q -- "dbt sur Trino" --> D["Gold<br/>fct_trip + 4 dimensions<br/>Iceberg"]
+    Q -- "dbt sur Trino" --> D["Gold<br/>fct_trip incrémental + 4 dimensions<br/>Iceberg"]
     D --> E["Trino<br/>SQL interactif"]
     E --> F["Superset"]
-    G["Airflow"] -. "orchestre" .-> B & C & Q & D
+    G["Airflow + Cosmos"] -. "orchestre" .-> B & C & Q & D
     H["Catalogue REST Iceberg"] -.- C & D
 ```
 
@@ -95,6 +96,19 @@ Ce que j'en retiens :
 
 Créé par script via l'API de Superset, à partir de gold. Le relancer ne crée pas de doublon.
 
+## Tests et CI
+
+À chaque PR, sans Docker :
+
+| Job | Ce qui est vérifié |
+|---|---|
+| Lint et tests | ruff, tests Python, `dbt parse` sur la cible Trino |
+| dbt sur DuckDB | `dbt build` complet sur un silver synthétique typé depuis le contrat, tests dbt et tests unitaires |
+| Idempotence | un mois rechargé, deux fois de suite, après une correction : ni doublon ni mois voisin touché |
+| DAG Airflow | le DAG se charge dans un vrai Airflow, Cosmos rend une tâche par modèle, et le groupe dbt s'exécute sur DuckDB avec le mois du run |
+
+`fct_trip` est incrémental par mois source ([ADR 0009](docs/adr/0009-incremental-fct-trip.md)) : un mois rechargé remplace ses lignes au lieu de les dupliquer. Les mêmes modèles tournent sur Trino en production et sur DuckDB en CI ([ADR 0010](docs/adr/0010-dbt-ci-duckdb.md)). Les tests unitaires dbt couvrent l'incrémental, le calendrier et le référentiel des opérateurs.
+
 ## Démarrage
 
 ```bash
@@ -114,6 +128,17 @@ docker exec openlakehouse-airflow-1 airflow dags test monthly_lakehouse 2024-06-
 uv run python infra/superset/create_dashboard.py
 ```
 
+Pour lancer dbt sans Docker, sur DuckDB :
+
+```bash
+uv run python tests/fixtures/load_silver.py dbt/target/ci.duckdb
+cd dbt && export DBT_DUCKDB_PATH=target/ci.duckdb
+uv run dbt build --target ci --profiles-dir . --exclude-resource-type unit_test
+uv run dbt test --target ci --profiles-dir . --resource-type unit_test
+```
+
+Les tests unitaires passent après le build : celui de l'incrémental lit les colonnes de la table construite.
+
 Pour rejouer les mesures :
 
 ```bash
@@ -122,7 +147,7 @@ uv run python benchmarks/run.py --scale 4m --runs 7
 uv run python benchmarks/report.py --scale 4m
 ```
 
-Le DAG calcule le mois à charger comme la date d'exécution moins 60 jours, soit avril pour l'exemple ci-dessus. Il a tourné de bout en bout : ingestion, Spark, contrat, compaction, dbt.
+Le DAG calcule le mois à charger comme la date d'exécution moins 60 jours, soit avril pour l'exemple ci-dessus. La couche gold y est rendue par Cosmos : une tâche par modèle dbt, suivie de ses tests, et le mois du run transmis à `fct_trip` ([ADR 0011](docs/adr/0011-cosmos.md)).
 
 ## Décisions d'architecture
 
@@ -136,6 +161,9 @@ Le DAG calcule le mois à charger comme la date d'exécution moins 60 jours, soi
 | [0006](docs/adr/0006-dbt-on-trino.md) | dbt sur Trino plutôt que des transformations Spark |
 | [0007](docs/adr/0007-data-quality.md) | Contrôles générés depuis le contrat, sans Great Expectations ni Soda |
 | [0008](docs/adr/0008-object-store.md) | MinIO en build figé, après la disparition de son image officielle |
+| [0009](docs/adr/0009-incremental-fct-trip.md) | `fct_trip` incrémental en `delete+insert` par mois source |
+| [0010](docs/adr/0010-dbt-ci-duckdb.md) | dbt exécuté en CI sur DuckDB, Trino restant la référence |
+| [0011](docs/adr/0011-cosmos.md) | Cosmos pour rendre le projet dbt en tâches Airflow |
 
 ```
 infra/           docker-compose, configs Trino, Spark, Airflow, Superset
@@ -143,11 +171,13 @@ ingestion/       téléchargement TLC vers bronze
 spark_jobs/      bronze vers silver, maintenance Iceberg
 quality/         contrôles générés depuis le contrat
 dbt/             silver vers gold, tests, exposition
-airflow/dags/    orchestration mensuelle
+airflow/dags/    orchestration mensuelle, dbt rendu par Cosmos
+airflow/tests/   intégrité du DAG et exécution du groupe dbt
 governance/      contrats de données et rôles Trino
 benchmarks/      requêtes, exécution, résultats bruts et rapport
 scripts/         démonstration Iceberg, chargement d'un mois
 docs/adr/        décisions d'architecture
+tests/           tests Python et dbt sur DuckDB, jeu de données synthétique
 ```
 
 ## Limites
@@ -156,6 +186,7 @@ docs/adr/        décisions d'architecture
 - **Pas de production.** Secrets par défaut, MinIO figé sans correctifs, catalogue sur SQLite, socket Docker exposé à Airflow : tout cela reste réservé à un usage local.
 - **Benchmarks ponctuels.** Mesurés sur une machine, un soir, avec des temps courts où quelques dixièmes de seconde pèsent lourd.
 - **4 mois, pas des centaines de millions de lignes.** Le chargement à 12 mois reste à faire.
+- **La CI tourne sur DuckDB, pas sur Trino.** Elle valide la logique des modèles, pas le dialecte Trino des macros, les propriétés Iceberg ni les performances. Sur la stack, `scripts/run_month.sh` reste le test de référence.
 - **La qualité des données source n'est pas auditée.** Les lignes hors bornes sont écartées, sans rapport sur ce qui a été rejeté.
 
 ## Source
