@@ -2,39 +2,126 @@ version: 2
 
 models:
   - name: fct_trip
-    description: Un trajet par ligne, tous services confondus.
+    description: >
+      Un trajet par ligne, tous services confondus. Incrémental par mois source :
+      un mois rechargé remplace ses lignes au lieu de les dupliquer.
     columns:
       - name: trip_id
+        description: Hash SHA-256 des champs du trajet, calculé en silver.
         tests: [not_null]
       - name: service
+        description: yellow, green ou fhvhv (VTC).
         tests:
           - accepted_values:
               arguments:
                 values: ["yellow", "green", "fhvhv"]
       - name: pickup_zone_id
+        description: Zone TLC de prise en charge.
         tests:
           - relationships:
               arguments:
                 to: ref('dim_zone')
                 field: zone_id
       - name: payment_type
+        description: Code TLC du moyen de paiement, 0 quand la source ne le renseigne pas.
         tests:
           - relationships:
               arguments:
                 to: ref('dim_payment')
                 field: payment_type
+      - name: source_month
+        description: Mois du fichier TLC d'origine, clé de rechargement de l'incrémental.
+        tests: [not_null]
   - name: dim_zone
+    description: Les 265 zones de taxi de New York, depuis le référentiel TLC.
     columns:
       - name: zone_id
         tests: [not_null, unique]
   - name: dim_date
+    description: Un jour par ligne, du premier au dernier jour de prise en charge observé.
     columns:
       - name: date_day
         tests: [not_null, unique]
   - name: dim_payment
+    description: Libellés des codes de paiement TLC.
     columns:
       - name: payment_type
         tests: [not_null, unique]
+  - name: dim_vendor
+    description: Opérateurs, du fournisseur de taximètre à la plateforme VTC.
+    columns:
+      - name: vendor_name
+        tests: [not_null]
+
+unit_tests:
+  - name: fct_trip_reloads_only_the_requested_month
+    description: En incrémental avec un mois passé en variable, seules les lignes de ce mois sont rechargées.
+    model: fct_trip
+    overrides:
+      macros:
+        is_incremental: true
+      vars:
+        month: "2024-02"
+    given:
+      - input: ref('stg_trips')
+        rows:
+          - {trip_id: a, source_month: "2024-01"}
+          - {trip_id: b, source_month: "2024-02"}
+          - {trip_id: c, source_month: "2024-02"}
+      - input: this
+        rows:
+          - {trip_id: a, source_month: "2024-01"}
+    expect:
+      rows:
+        - {trip_id: b, source_month: "2024-02"}
+        - {trip_id: c, source_month: "2024-02"}
+
+  - name: fct_trip_loads_new_months_without_a_variable
+    description: Sans variable, un run incrémental charge les mois que la table n'a pas encore.
+    model: fct_trip
+    overrides:
+      macros:
+        is_incremental: true
+    given:
+      - input: ref('stg_trips')
+        rows:
+          - {trip_id: a, source_month: "2024-01"}
+          - {trip_id: b, source_month: "2024-02"}
+      - input: this
+        rows:
+          - {trip_id: a, source_month: "2024-01"}
+    expect:
+      rows:
+        - {trip_id: b, source_month: "2024-02"}
+
+  - name: dim_date_fills_gaps_and_flags_weekends
+    description: Le calendrier couvre les jours sans trajet, et samedi et dimanche sont des week-ends.
+    model: dim_date
+    given:
+      - input: ref('stg_trips')
+        rows:
+          - {pickup_date: 2024-01-05}
+          - {pickup_date: 2024-01-07}
+    expect:
+      rows:
+        - {date_day: 2024-01-05, iso_day_of_week: 5, is_weekend: false}
+        - {date_day: 2024-01-06, iso_day_of_week: 6, is_weekend: true}
+        - {date_day: 2024-01-07, iso_day_of_week: 7, is_weekend: true}
+
+  - name: dim_vendor_names_known_operators
+    description: Les codes connus reçoivent leur nom, les autres « Inconnu ».
+    model: dim_vendor
+    given:
+      - input: ref('stg_trips')
+        rows:
+          - {service: yellow, vendor_id: "2"}
+          - {service: fhvhv, vendor_id: HV0003}
+          - {service: green, vendor_id: "99"}
+    expect:
+      rows:
+        - {service: yellow, vendor_id: "2", vendor_name: Curb Mobility}
+        - {service: fhvhv, vendor_id: HV0003, vendor_name: Uber}
+        - {service: green, vendor_id: "99", vendor_name: Inconnu}
 
 exposures:
   - name: dashboard_superset
