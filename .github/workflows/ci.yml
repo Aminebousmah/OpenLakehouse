@@ -20,3 +20,30 @@ jobs:
       # Includes tests/test_dbt_duckdb.py: dbt build, data tests, unit tests and month reloads.
       - run: uv run pytest -q
 
+  airflow:
+    name: DAG Airflow et Cosmos
+    runs-on: ubuntu-latest
+    env:
+      AIRFLOW_VERSION: "2.10.5"
+      COSMOS_VERSION: "~=1.15.0"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv python install 3.12
+      # The project venv plays the role of the image's lake-venv: dbt and the pipeline tools.
+      - run: uv sync
+      - name: Airflow et Cosmos, dans leur propre venv comme dans l'image
+        run: |
+          curl -sSfo "$RUNNER_TEMP/constraints.txt" \
+            "https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-3.12.txt"
+          uv venv --python 3.12 "$RUNNER_TEMP/airflow-venv"
+          VIRTUAL_ENV="$RUNNER_TEMP/airflow-venv" uv pip install \
+            "apache-airflow==${AIRFLOW_VERSION}" "astronomer-cosmos${COSMOS_VERSION}" pytest \
+            --constraint "$RUNNER_TEMP/constraints.txt"
+          {
+            echo "AIRFLOW_HOME=$RUNNER_TEMP/airflow"
+            echo "LAKEHOUSE_ROOT=$GITHUB_WORKSPACE"
+            echo "LAKE_TOOLS=$GITHUB_WORKSPACE/.venv/bin"
+          } >> "$GITHUB_ENV"
+      - run: '"$RUNNER_TEMP/airflow-venv/bin/airflow" db migrate'
+      - run: '"$RUNNER_TEMP/airflow-venv/bin/python" -m pytest airflow/tests -q'
