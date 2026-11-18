@@ -7,6 +7,7 @@ on:
 
 jobs:
   checks:
+    name: Lint, tests et dbt sur DuckDB
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -14,4 +15,8 @@ jobs:
       - run: uv python install 3.12
       - run: uv sync
       - run: uv run ruff check .
+      - name: Le projet dbt se parse pour la cible de production
+        run: uv run dbt parse --project-dir dbt --profiles-dir dbt --target trino
+      # Includes tests/test_dbt_duckdb.py: dbt build, data tests, unit tests and month reloads.
       - run: uv run pytest -q
+
