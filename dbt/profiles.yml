@@ -10,3 +10,9 @@ openlakehouse:
       catalog: iceberg
       schema: staging
       threads: 2
+    # CI and local checks without Docker: the same models on DuckDB, over a small fixture.
+    ci:
+      type: duckdb
+      path: "{{ env_var('DBT_DUCKDB_PATH', 'target/ci.duckdb') }}"
+      schema: staging
+      threads: 2
